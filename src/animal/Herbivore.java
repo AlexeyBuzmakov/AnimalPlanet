@@ -2,7 +2,6 @@ package animal;
 
 public class Herbivore extends Animal{
     private static int herbivoreCount;
-    private static int herbivoreVisibility;
 
     public Herbivore() {
         herbivoreCount++;
@@ -16,19 +15,10 @@ public class Herbivore extends Animal{
         Herbivore.herbivoreCount = herbivoreCount;
     }
 
-    public static int getHerbivoreVisibility() {
-        return herbivoreVisibility;
-    }
-
-    public static void setHerbivoreVisibility(int herbivoreVisibility) {
-        Herbivore.herbivoreVisibility = herbivoreVisibility;
-    }
-
-
-
     @Override
     public void die() {
         herbivoreCount--;
+        System.out.println("Травоядное съели");
     }
 
     @Override

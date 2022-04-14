@@ -1,4 +1,4 @@
 package gameobject;
 
-public abstract class GameObject {
+public class GameObject {
 }

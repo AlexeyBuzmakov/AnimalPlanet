@@ -1,48 +1,49 @@
 package game;
 
-
+import animal.Animal;
 import gameobject.GameObject;
 import animal.Herbivore;
 import animal.Predator;
 import food.Meat;
 import food.Grass;
+import java.util.Random;
 import java.util.Scanner;
 
 public class Game {
     private static final int WIDTH = 25;
     private static final int HEIGTH = 25;
-    private int coordinateX;
-    private int coordinateY;
-    private final GameObject[][] territory = new GameObject[WIDTH][HEIGTH];
-
+    private static final GameObject[][] TERRITORY = new GameObject[WIDTH][HEIGTH];
 
     public void start() {
         inputParameters();
         createGameObject();
-        searchFoodAnimal();
-        doStepAnimal();
         showTerritory();
+        while(checkEndGame()) {
+            doStepAnimal();
+            createMeat();
+            createGrass();
+            recuperation();
+            showTerritory();
+        }
     }
 
     private void inputParameters() {
         Scanner scanner = new Scanner(System.in);
 
-        System.out.println("Введите количество хищников");
+        System.out.println("Введите стартовое количество хищников");
         Predator.setPredatorCount(scanner.nextInt());
 
-        System.out.println("Введите дальность видимости хищников");
-        Predator.setPredatorVisibility(scanner.nextInt());
-
-        System.out.println("Введите количество травоядных");
+        System.out.println("Введите стартовое количество травоядных");
         Herbivore.setHerbivoreCount(scanner.nextInt());
 
-        System.out.println("Введите дальность видимости травоядных");
-        Herbivore.setHerbivoreVisibility(scanner.nextInt());
 
-        System.out.println("Введите количество мяса");
+        System.out.println("Введите дальность видимости животных");
+        Animal.setVisibility(scanner.nextInt());
+
+        System.out.println("Введите стартовое количество мяса");
         Meat.setMeatCount(scanner.nextInt());
 
-        System.out.println("Введите количество травы");
+        System.out.println("Введите стартовое количество травы");
         Grass.setGrassCount(scanner.nextInt());
     }
 
@@ -54,36 +55,38 @@ public class Game {
     }
 
     private void createPredator() {
-        int i = 0;
-        while (i <= Predator.getPredatorCount()) {
+        int i = Predator.getPredatorCount();
+        Predator.setPredatorCount(0);
+        while (i > 0 ) {
             int a = (int) (Math.random() * 25);
             int b = (int) (Math.random() * 25);
-            if (territory[a][b] == null) {
-                territory[a][b] = new Predator();
-                i++;
+            if (TERRITORY[a][b] == null) {
+                TERRITORY[a][b] = new Predator();
+                i--;
             }
         }
     }
 
     private void createHerbivore() {
-        int i = 0;
-        while (i <= Herbivore.getHerbivoreCount()) {
+        int i = Herbivore.getHerbivoreCount();
+        Herbivore.setHerbivoreCount(0);
+        while (i > 0 ) {
             int a = (int) (Math.random() * 25);
             int b = (int) (Math.random() * 25);
-            if (territory[a][b] == null) {
-                territory[a][b] = new Herbivore();
-                i++;
+            if (TERRITORY[a][b] == null) {
+                TERRITORY[a][b] = new Herbivore();
+                i--;
             }
         }
     }
 
     private void createMeat() {
         int i = 0;
-        while (i <= Meat.getMeatCount()) {
+        while (i < Meat.getMeatCount()) {
             int a = (int) (Math.random() * 25);
             int b = (int) (Math.random() * 25);
-            if (territory[a][b] == null) {
-                territory[a][b] = new Meat();
+            if (TERRITORY[a][b] == null) {
+                TERRITORY[a][b] = new Meat();
                 i++;
             }
         }
@@ -91,167 +94,149 @@ public class Game {
 
     private void createGrass() {
         int i = 0;
-        while (i <= Grass.getGrassCount()) {
+        while (i < Grass.getGrassCount()) {
             int a = (int) (Math.random() * 25);
             int b = (int) (Math.random() * 25);
-            if (territory[a][b] == null) {
-                territory[a][b] = new Grass();
+            if (TERRITORY[a][b] == null) {
+                TERRITORY[a][b] = new Grass();
                 i++;
             }
         }
     }
 
-    private void searchFoodAnimal() {
-        searchFoodPredator();
-        searchFoodHerbivore();
-    }
-
-    private void searchFoodPredator() {
-        int p = Predator.getPredatorVisibility();
-        for (int i = 0; i < territory.length; i++) {
-            for (int j = 0; j < territory[i].length; j++) {
-                if (territory[i][j] instanceof Predator) {
-                    coordinateX = i;
-                    coordinateY = j;
-                    int count = 0;
-                    int x = 0;
-                    if (p > i) {
-                        i += p - i;
-                    }
-                    if (p > j) {
-                        j += p - j;
-                    }
-                    for (int a = i - p; a <= 2 * p; a++) {
-                        if (i + p > 24) {
-                            x = i + p - 24;
-                        }
-                        if (j + p > 24) {
-                            x = j + p - 24;
-                        }
-
-                        for (int b = j - p; b <= 2 * p - x; b++) {
-                            if (count > 0)
-                                break;
-                            if (territory[a][b] instanceof Herbivore || territory[a][b] instanceof Meat) {
-                                territory[a][b] = new Predator();
-                                territory[i][j] = null;
-                                count++;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private void searchFoodHerbivore() {
-        int n = Herbivore.getHerbivoreVisibility();
-        for (int i = 0; i < territory.length; i++) {
-            for (int j = 0; j < territory[i].length; j++) {
-                if (territory[i][j] instanceof Herbivore) {
-                    coordinateX = i;
-                    coordinateY = j;
-                    int count = 0;
-                    int x = 0;
-                    if (n > i) {
-                        i += n - i;
-                    }
-                    if (n > j) {
-                        j += n - j;
-                    }
-                    for (int a = i - n; a <= 2 * n; a++) {
-                        if (i + n > 24) {
-                            x = i + n - 24;
-                        }
-                        if (j + n > 24) {
-                            x = j + n - 24;
-                        }
-                        for (int b = j - n; b <= 2 * n - x; b++) {
-                            if (count > 0)
-                                break;
-                            if (territory[a][b] instanceof Grass) {
-                                territory[a][b] = new Herbivore();
-                                territory[i][j] = null;
-                                count++;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     private void doStepAnimal() {
-        doStepPredator(coordinateX, coordinateY);
-        doStepHerbivore(coordinateX, coordinateY);
-    }
-
-
-    private void doStepPredator(int a, int b) {
-        int n = 2;
-        int m = 2;
-        while (territory[a][b] != null) {
-            for (int i = a - 1; i < n; i++) {
-                for (int j = b - 1; j < m; j++) {
-                    if (territory[i][j] == null) {
-                        territory[i][j] = new Predator();
-                        territory[a][b] = null;
+        for(int i = 0; i < WIDTH; i++) {
+            for(int j = 0; j < HEIGTH; j++) {
+                if(TERRITORY[i][j] instanceof Animal) {
+                    if (!((Animal) TERRITORY[i][j]).isTired()) {
+                        if(!checkEat(i, j)) {
+                            if(((Animal) TERRITORY[i][j]).hungerDie()) {
+                                TERRITORY[i][j] = null;
+                            }
+                            moveAnimal(i, j);
+                        }
                     }
                 }
-            }
-            if (a > 0) {
-                a--;
-                n += 2;
-            } else {
-                n++;
-            }
-            if (b > 0) {
-                b--;
-                m += 2;
-            } else {
-                m++;
             }
         }
     }
 
-    private void doStepHerbivore(int a, int b) {
-        int n = 2;
-        int m = 2;
-        while (territory[a][b] != null) {
-            for (int i = a - 1; i < n; i++) {
-                for (int j = b - 1; j < m; j++) {
-                    if (territory[i][j] == null) {
-                        territory[i][j] = new Herbivore();
-                        territory[a][b] = null;
+    private boolean checkEat(int i, int j) {
+        int visibility = Animal.getVisibility();
+        for (int a = i - visibility; a <= i + visibility; a++) {
+            for (int b = j - visibility; b <= j + visibility; b++) {
+                if(a < 0 || b < 0 || i + visibility >= WIDTH || j + visibility >= HEIGTH) {
+                    continue;
+                }
+                if(TERRITORY[i][j] instanceof Predator) {
+                    if (TERRITORY[a][b] instanceof Herbivore) {
+                        ((Herbivore) TERRITORY[a][b]).die();
+                        TERRITORY[a][b] = TERRITORY[i][j];
+                        ((Predator) TERRITORY[a][b]).satiety();
+                        TERRITORY[i][j] = null;
+                        ((Predator) TERRITORY[a][b]).setTired(true);
+                        reproductionAnimal(a, b);
+                        return true;
+
+                    } else if (TERRITORY[a][b] instanceof Meat) {
+                        TERRITORY[a][b] = TERRITORY[i][j];
+                        ((Predator) TERRITORY[a][b]).satiety();
+                        TERRITORY[i][j] = null;
+                        ((Predator) TERRITORY[a][b]).setTired(true);
+                        reproductionAnimal(a, b);
+                        return true;
+                    }
+                }
+                else if(TERRITORY[i][j] instanceof Herbivore) {
+                    if (TERRITORY[a][b] instanceof Grass) {
+                        TERRITORY[a][b] = TERRITORY[i][j];
+                        ((Herbivore) TERRITORY[a][b]).satiety();
+                        reproductionAnimal(a, b);
+                        TERRITORY[i][j] = null;
+                        ((Herbivore) TERRITORY[a][b]).setTired(true);
+                        return true;
                     }
                 }
             }
-            if (a > 0) {
-                a--;
-                n += 2;
-            } else {
-                n++;
-            }
-            if (b > 0) {
-                b--;
-                m += 2;
-            } else {
-                m++;
+        }
+        return false;
+    }
+
+    public void reproductionAnimal(int a, int b) {
+        Random random = new Random();
+        boolean reproduction = random.nextBoolean();
+        if (reproduction) {
+            int n = 3;
+            int m = 3;
+            while (true) {
+                int i = (int) ((a - 1) + Math.random() * n);
+                int j = (int) ((b - 1) + Math.random() * m);
+                if (i >= 0 && i < WIDTH && j >= 0 && j < HEIGTH) {
+                    if (TERRITORY[i][j] == null) {
+                        if (TERRITORY[a][b] instanceof Predator) {
+                            TERRITORY[i][j] = new Predator();
+                        } else {
+                            TERRITORY[i][j] = new Herbivore();
+                        }
+                        break;
+                    }
+                }
             }
         }
     }
 
+    private void moveAnimal(int a, int b) {
+        int lengthMove = 3;
+        while(true) {
+            int i = (int) ((a - 1) + Math.random() * lengthMove);
+            int j = (int) ((b - 1) + Math.random() * lengthMove);
+            if(i >= 0 && i < WIDTH && j >= 0 && j < HEIGTH) {
+                if (TERRITORY[i][j] == null) {
+                        TERRITORY[i][j] = TERRITORY[a][b];
+                        TERRITORY[a][b] = null;
+                        break;
+                    }
+                }
+            }
+        }
+
+    public void recuperation() {
+        for(int i = 0; i < WIDTH; i++) {
+            for(int j = 0; j < HEIGTH; j++) {
+                if(TERRITORY[i][j] instanceof Animal) {
+                    ((Animal) TERRITORY[i][j]).setTired(false);
+                }
+            }
+        }
+    }
+
+    public boolean checkEndGame() {
+        if(Predator.getPredatorCount() == 0) {
+            System.out.println("Травоядные победили");
+            return false;
+        }
+        else if(Herbivore.getHerbivoreCount() == 0) {
+            System.out.println("Хищники победили");
+            return false;
+        }
+        return true;
+    }
 
     private void showTerritory() {
-        for (int i = 0; i < territory.length; i++) {
-            for (int j = 0; j < territory[i].length; j++) {
-                System.out.print(territory[i][j] + " ");
+        for (int i = 0; i < WIDTH; i++) {
+            for (int j = 0; j < HEIGTH; j++) {
+                if(TERRITORY[i][j] == null) {
+                       System.out.print("    ");
+                }
+                else {
+                    System.out.print(TERRITORY[i][j]);
+                }
             }
             System.out.println();
         }
         System.out.print("Хищников " + Predator.getPredatorCount() + " ");
         System.out.println("Травоядных " + Herbivore.getHerbivoreCount());
-        System.out.println("----------------------------------------------------------------------------------------------------------------------------");
+        System.out.println("----------------------------------------------------------------------------------------------------");
     }
 }
 
