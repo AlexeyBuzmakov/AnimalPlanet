@@ -12,7 +12,12 @@ public class Grass extends Food{
     }
 
     @Override
+    public void destroyFood() {
+        grassCount--;
+    }
+
+    @Override
     public String toString() {
-        return " G  ";
+        return " G ";
     }
 }

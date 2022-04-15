@@ -37,9 +37,8 @@ public abstract class Animal extends GameObject {
     public boolean hungerDie() {
         hungerDays--;
         if(hungerDays == 0) {
-            die();
-            return true;
+            System.out.println("Животное умерло");
         }
-        return false;
+        return hungerDays == 0;
     }
 }

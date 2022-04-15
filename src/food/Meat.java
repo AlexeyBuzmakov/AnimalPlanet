@@ -12,7 +12,12 @@ public class Meat extends Food{
     }
 
     @Override
+    public void destroyFood() {
+        meatCount--;
+    }
+
+    @Override
     public String toString() {
-        return " M  ";
+        return " M ";
     }
 }

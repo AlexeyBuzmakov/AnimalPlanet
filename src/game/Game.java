@@ -17,7 +17,6 @@ public class Game {
     public void start() {
         inputParameters();
         createGameObject();
-        showTerritory();
         while(checkEndGame()) {
             doStepAnimal();
             createMeat();
@@ -111,9 +110,12 @@ public class Game {
                     if (!((Animal) TERRITORY[i][j]).isTired()) {
                         if(!checkEat(i, j)) {
                             if(((Animal) TERRITORY[i][j]).hungerDie()) {
+                                ((Animal) TERRITORY[i][j]).die();
                                 TERRITORY[i][j] = null;
                             }
-                            moveAnimal(i, j);
+                            else {
+                                moveAnimal(i, j);
+                            }
                         }
                     }
                 }
@@ -139,6 +141,7 @@ public class Game {
                         return true;
 
                     } else if (TERRITORY[a][b] instanceof Meat) {
+                        ((Meat) TERRITORY[a][b]).destroyFood();
                         TERRITORY[a][b] = TERRITORY[i][j];
                         ((Predator) TERRITORY[a][b]).satiety();
                         TERRITORY[i][j] = null;
@@ -149,6 +152,7 @@ public class Game {
                 }
                 else if(TERRITORY[i][j] instanceof Herbivore) {
                     if (TERRITORY[a][b] instanceof Grass) {
+                        ((Grass) TERRITORY[a][b]).destroyFood();
                         TERRITORY[a][b] = TERRITORY[i][j];
                         ((Herbivore) TERRITORY[a][b]).satiety();
                         reproductionAnimal(a, b);
@@ -175,8 +179,11 @@ public class Game {
                     if (TERRITORY[i][j] == null) {
                         if (TERRITORY[a][b] instanceof Predator) {
                             TERRITORY[i][j] = new Predator();
+                            System.out.println("Новый хищник");
+
                         } else {
                             TERRITORY[i][j] = new Herbivore();
+                            System.out.println("Новое травоядное");
                         }
                         break;
                     }
@@ -226,7 +233,7 @@ public class Game {
         for (int i = 0; i < WIDTH; i++) {
             for (int j = 0; j < HEIGTH; j++) {
                 if(TERRITORY[i][j] == null) {
-                       System.out.print("    ");
+                       System.out.print("   ");
                 }
                 else {
                     System.out.print(TERRITORY[i][j]);
