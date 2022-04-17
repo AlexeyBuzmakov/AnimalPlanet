@@ -5,7 +5,7 @@ import gameobject.GameObject;
 
 public abstract class Animal extends GameObject {
     private static int visibility;
-    private  int hungerDays;
+    private  static int hungerDays;
     private boolean isTired;
 
     public Animal() {
@@ -36,9 +36,6 @@ public abstract class Animal extends GameObject {
 
     public boolean hungerDie() {
         hungerDays--;
-        if(hungerDays == 0) {
-            System.out.println("Животное умерло");
-        }
-        return hungerDays == 0;
+        return hungerDays < 0;
     }
 }

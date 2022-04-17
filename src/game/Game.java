@@ -17,8 +17,9 @@ public class Game {
     public void start() {
         inputParameters();
         createGameObject();
+        showTerritory();
         while(checkEndGame()) {
-            doStepAnimal();
+            doStep();
             createMeat();
             createGrass();
             recuperation();
@@ -34,7 +35,6 @@ public class Game {
 
         System.out.println("Введите стартовое количество травоядных");
         Herbivore.setHerbivoreCount(scanner.nextInt());
-
 
         System.out.println("Введите дальность видимости животных");
         Animal.setVisibility(scanner.nextInt());
@@ -103,11 +103,12 @@ public class Game {
         }
     }
 
-    private void doStepAnimal() {
+    private void doStep() {
         for(int i = 0; i < WIDTH; i++) {
             for(int j = 0; j < HEIGTH; j++) {
                 if(TERRITORY[i][j] instanceof Animal) {
                     if (!((Animal) TERRITORY[i][j]).isTired()) {
+                        ((Animal) TERRITORY[i][j]).setTired(true);
                         if(!checkEat(i, j)) {
                             if(((Animal) TERRITORY[i][j]).hungerDie()) {
                                 ((Animal) TERRITORY[i][j]).die();
@@ -124,49 +125,78 @@ public class Game {
     }
 
     private boolean checkEat(int i, int j) {
-        int visibility = Animal.getVisibility();
-        for (int a = i - visibility; a <= i + visibility; a++) {
-            for (int b = j - visibility; b <= j + visibility; b++) {
-                if(a < 0 || b < 0 || i + visibility >= WIDTH || j + visibility >= HEIGTH) {
-                    continue;
-                }
-                if(TERRITORY[i][j] instanceof Predator) {
-                    if (TERRITORY[a][b] instanceof Herbivore) {
-                        ((Herbivore) TERRITORY[a][b]).die();
-                        TERRITORY[a][b] = TERRITORY[i][j];
-                        ((Predator) TERRITORY[a][b]).satiety();
-                        TERRITORY[i][j] = null;
-                        ((Predator) TERRITORY[a][b]).setTired(true);
-                        reproductionAnimal(a, b);
-                        return true;
+        if(TERRITORY[i][j] instanceof Predator) {
+            return checkEatPredator(i, j);
+        }
+        else {
+            return checkEatHerbivore(i, j);
+        }
+    }
 
-                    } else if (TERRITORY[a][b] instanceof Meat) {
-                        ((Meat) TERRITORY[a][b]).destroyFood();
-                        TERRITORY[a][b] = TERRITORY[i][j];
-                        ((Predator) TERRITORY[a][b]).satiety();
-                        TERRITORY[i][j] = null;
-                        ((Predator) TERRITORY[a][b]).setTired(true);
-                        reproductionAnimal(a, b);
-                        return true;
-                    }
+    private boolean checkEatPredator(int i, int j) {
+        int visibility = Animal.getVisibility();
+        int visibilityWidth = visibility + i;
+        int visibilityHeigth = visibility + j;
+        for (int a = i - visibility; a <= visibilityWidth; a++) {
+            for (int b = j - visibility; b <= visibilityHeigth; b++) {
+                while(a < 0 ) {
+                    a++;
                 }
-                else if(TERRITORY[i][j] instanceof Herbivore) {
-                    if (TERRITORY[a][b] instanceof Grass) {
-                        ((Grass) TERRITORY[a][b]).destroyFood();
-                        TERRITORY[a][b] = TERRITORY[i][j];
-                        ((Herbivore) TERRITORY[a][b]).satiety();
-                        reproductionAnimal(a, b);
-                        TERRITORY[i][j] = null;
-                        ((Herbivore) TERRITORY[a][b]).setTired(true);
-                        return true;
+                while(b < 0) {
+                    b++;
+                }
+                while(visibilityWidth >= WIDTH) {
+                    visibilityWidth--;
+                }
+                while(visibilityHeigth >= HEIGTH) {
+                    visibilityHeigth--;
+                }
+                if (TERRITORY[a][b] instanceof Herbivore || TERRITORY[a][b] instanceof Meat) {
+                    if(TERRITORY[a][b] instanceof Herbivore) {
+                        ((Herbivore) TERRITORY[a][b]).die();
                     }
+                    TERRITORY[a][b] = TERRITORY[i][j];
+                    ((Predator) TERRITORY[a][b]).satiety();
+                    TERRITORY[i][j] = null;
+                    reproductionAnimal(a, b);
+                    return true;
                 }
             }
         }
         return false;
     }
 
-    public void reproductionAnimal(int a, int b) {
+    private boolean checkEatHerbivore(int i, int j) {
+        int visibility = Animal.getVisibility();
+        int visibilityWidth = visibility + i;
+        int visibilityHeigth = visibility + j;
+        for (int a = i - visibility; a <= visibilityWidth; a++) {
+            for (int b = j - visibility; b <= visibilityHeigth; b++) {
+                while(a < 0 ) {
+                   a++;
+                }
+                while(b < 0) {
+                    b++;
+                }
+                while(visibilityWidth >= WIDTH) {
+                    visibilityWidth--;
+                }
+                while(visibilityHeigth >= HEIGTH) {
+                    visibilityHeigth--;
+                }
+                if (TERRITORY[a][b] instanceof Grass) {
+                    TERRITORY[a][b] = TERRITORY[i][j];
+                    ((Herbivore) TERRITORY[a][b]).satiety();
+                    TERRITORY[i][j] = null;
+                    reproductionAnimal(a, b);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private void reproductionAnimal(int a, int b) {
         Random random = new Random();
         boolean reproduction = random.nextBoolean();
         if (reproduction) {
@@ -179,11 +209,9 @@ public class Game {
                     if (TERRITORY[i][j] == null) {
                         if (TERRITORY[a][b] instanceof Predator) {
                             TERRITORY[i][j] = new Predator();
-                            System.out.println("Новый хищник");
 
                         } else {
                             TERRITORY[i][j] = new Herbivore();
-                            System.out.println("Новое травоядное");
                         }
                         break;
                     }
@@ -207,7 +235,7 @@ public class Game {
             }
         }
 
-    public void recuperation() {
+    private void recuperation() {
         for(int i = 0; i < WIDTH; i++) {
             for(int j = 0; j < HEIGTH; j++) {
                 if(TERRITORY[i][j] instanceof Animal) {
@@ -217,7 +245,7 @@ public class Game {
         }
     }
 
-    public boolean checkEndGame() {
+    private boolean checkEndGame() {
         if(Predator.getPredatorCount() == 0) {
             System.out.println("Травоядные победили");
             return false;
@@ -232,12 +260,7 @@ public class Game {
     private void showTerritory() {
         for (int i = 0; i < WIDTH; i++) {
             for (int j = 0; j < HEIGTH; j++) {
-                if(TERRITORY[i][j] == null) {
-                       System.out.print("   ");
-                }
-                else {
-                    System.out.print(TERRITORY[i][j]);
-                }
+            System.out.print(TERRITORY[i][j]);
             }
             System.out.println();
         }

@@ -18,11 +18,10 @@ public class Herbivore extends Animal{
     @Override
     public void die() {
         herbivoreCount--;
-        System.out.println("Травоядное съели");
     }
 
     @Override
     public String toString() {
-        return " H ";
+        return "  H ";
     }
 }
