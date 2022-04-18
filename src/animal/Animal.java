@@ -5,11 +5,20 @@ import gameobject.GameObject;
 
 public abstract class Animal extends GameObject {
     private static int visibility;
-    private  static int hungerDays;
+    private static int hungerDays;
     private boolean isTired;
+    private int life;
 
     public Animal() {
-       hungerDays = 5;
+       life = getHungerDays();
+    }
+
+    public static int getHungerDays() {
+        return hungerDays;
+    }
+
+    public static void setHungerDays(int hungerDays) {
+        Animal.hungerDays = hungerDays;
     }
 
     public static int getVisibility() {
@@ -31,11 +40,11 @@ public abstract class Animal extends GameObject {
     public abstract void die();
 
     public void satiety() {
-        hungerDays = 5;
+        life = getHungerDays();
     }
 
     public boolean hungerDie() {
-        hungerDays--;
-        return hungerDays < 0;
+        life--;
+        return life < 0;
     }
 }

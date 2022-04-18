@@ -36,6 +36,9 @@ public class Game {
         System.out.println("Введите стартовое количество травоядных");
         Herbivore.setHerbivoreCount(scanner.nextInt());
 
+        System.out.println("Введите количество дней без еды до смерти животного");
+        Animal.setHungerDays(scanner.nextInt());
+
         System.out.println("Введите дальность видимости животных");
         Animal.setVisibility(scanner.nextInt());
 
@@ -135,21 +138,10 @@ public class Game {
 
     private boolean checkEatPredator(int i, int j) {
         int visibility = Animal.getVisibility();
-        int visibilityWidth = visibility + i;
-        int visibilityHeigth = visibility + j;
-        for (int a = i - visibility; a <= visibilityWidth; a++) {
-            for (int b = j - visibility; b <= visibilityHeigth; b++) {
-                while(a < 0 ) {
-                    a++;
-                }
-                while(b < 0) {
-                    b++;
-                }
-                while(visibilityWidth >= WIDTH) {
-                    visibilityWidth--;
-                }
-                while(visibilityHeigth >= HEIGTH) {
-                    visibilityHeigth--;
+        for (int a = i - visibility; a <= i + visibility; a++) {
+            for (int b = j - visibility; b <= j + visibility; b++) {
+                if(a < 0 || b < 0 || a >= WIDTH || b >= HEIGTH) {
+                    continue;
                 }
                 if (TERRITORY[a][b] instanceof Herbivore || TERRITORY[a][b] instanceof Meat) {
                     if(TERRITORY[a][b] instanceof Herbivore) {
@@ -168,21 +160,10 @@ public class Game {
 
     private boolean checkEatHerbivore(int i, int j) {
         int visibility = Animal.getVisibility();
-        int visibilityWidth = visibility + i;
-        int visibilityHeigth = visibility + j;
-        for (int a = i - visibility; a <= visibilityWidth; a++) {
-            for (int b = j - visibility; b <= visibilityHeigth; b++) {
-                while(a < 0 ) {
-                   a++;
-                }
-                while(b < 0) {
-                    b++;
-                }
-                while(visibilityWidth >= WIDTH) {
-                    visibilityWidth--;
-                }
-                while(visibilityHeigth >= HEIGTH) {
-                    visibilityHeigth--;
+        for (int a = i - visibility; a <= i + visibility; a++) {
+            for (int b = j - visibility; b <= j + visibility; b++) {
+                if(a < 0 || b < 0 || a >= WIDTH || b >= HEIGTH) {
+                    continue;
                 }
                 if (TERRITORY[a][b] instanceof Grass) {
                     TERRITORY[a][b] = TERRITORY[i][j];
@@ -260,7 +241,12 @@ public class Game {
     private void showTerritory() {
         for (int i = 0; i < WIDTH; i++) {
             for (int j = 0; j < HEIGTH; j++) {
-            System.out.print(TERRITORY[i][j]);
+            if(TERRITORY[i][j] == null) {
+                System.out.print("   ");
+                }
+            else {
+                System.out.print(TERRITORY[i][j]);
+            }
             }
             System.out.println();
         }
